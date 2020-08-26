@@ -1,0 +1,10 @@
+fsl_clock.h:601:20:CLOCK_EnableClock	24	static
+fsl_port.h:268:20:PORT_SetPinConfig	32	static
+fsl_gpio.h:188:20:GPIO_PortSet	16	static
+fsl_gpio.h:208:20:GPIO_PortClear	16	static
+fsl_gpio.h:231:20:GPIO_PortToggle	16	static
+fsl_gpio.h:258:24:GPIO_PinRead	16	static
+fsl_gpio.h:267:24:GPIO_ReadPinInput	16	static
+SD2_board.c:67:6:board_init	32	static
+SD2_board.c:126:6:board_setLed	16	static
+SD2_board.c:148:6:board_getSw	16	static

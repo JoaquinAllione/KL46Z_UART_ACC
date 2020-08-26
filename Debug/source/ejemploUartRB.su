@@ -1,0 +1,6 @@
+core_cm0plus.h:733:22:__NVIC_EnableIRQ	16	static
+core_cm0plus.h:769:22:__NVIC_DisableIRQ	16	static
+ejemploUartRB.c:54:6:clear_buffer	24	static
+ejemploUartRB.c:63:6:main	8	static
+ejemploUartRB.c:93:6:insertar	24	static
+ejemploUartRB.c:113:6:mefPrincipal	24	static

@@ -1,0 +1,16 @@
+core_cm0plus.h:733:22:__NVIC_EnableIRQ	16	static
+core_cm0plus.h:840:22:__NVIC_SetPriority	24	static
+fsl_port.h:268:20:PORT_SetPinConfig	32	static
+fsl_port.h:439:20:PORT_SetPinInterruptConfig	24	static
+fsl_port.h:484:20:PORT_ClearPinsInterruptFlags	16	static
+mma8451.c:139:16:mma8451_read_reg	56	static
+mma8451.c:158:13:mma8451_write_reg	48	static
+mma8451.c:181:13:config_port_int1	16	static
+mma8451.c:212:6:mma8451_init	24	static
+mma8451.c:255:6:mma8451_enable	16	static
+mma8451.c:269:6:mma8451_disable	16	static
+mma8451.c:282:6:mma8451_setDataRate	32	static
+mma8451.c:306:9:mma8451_getAcX	8	static
+mma8451.c:311:9:mma8451_getAcY	8	static
+mma8451.c:316:9:mma8451_getAcZ	8	static
+mma8451.c:322:6:PORTC_PORTD_IRQHandler	32	static

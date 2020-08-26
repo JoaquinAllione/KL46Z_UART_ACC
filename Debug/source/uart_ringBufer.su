@@ -1,0 +1,17 @@
+core_cm0plus.h:733:22:__NVIC_EnableIRQ	16	static
+core_cm0plus.h:769:22:__NVIC_DisableIRQ	16	static
+fsl_clock.h:643:20:CLOCK_SetLpsci0Clock	16	static
+fsl_common.h:405:28:EnableIRQ	16	static
+fsl_lpsci.h:524:20:LPSCI_WriteByte	16	static
+fsl_lpsci.h:538:23:LPSCI_ReadByte	16	static
+fsl_uart.h:564:20:UART_WriteByte	16	static
+fsl_uart.h:578:23:UART_ReadByte	16	static
+fsl_port.h:371:20:PORT_SetPinMux	24	static
+uart_ringBufer.c:67:6:uart0_ringBuffer_init	24	static
+uart_ringBufer.c:103:6:uart1_ringBuffer_init	24	static
+uart_ringBufer.c:138:9:uart0_ringBuffer_recDatos	32	static
+uart_ringBufer.c:156:9:uart1_ringBuffer_recDatos	32	static
+uart_ringBufer.c:180:9:uart0_ringBuffer_envDatos	24	static
+uart_ringBufer.c:203:9:uart1_ringBuffer_envDatos	24	static
+uart_ringBufer.c:226:6:UART0_IRQHandler	16	static
+uart_ringBufer.c:260:6:UART1_IRQHandler	16	static
