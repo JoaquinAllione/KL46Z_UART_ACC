@@ -101,11 +101,10 @@ void insertar(uint8_t *pbuf, uint8_t caracter_a_insertar, int8_t pos_insertar){
 
 typedef enum{
 	EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA = 0,
-	EST_MEF_PRINCIPAL_ESP_NUM_GRUPO_1ER_DIGITO,
-	EST_MEF_PRINCIPAL_ESP_NUM_GRUPO_2DO_DIGITO,
-	EST_MEF_PRINCIPAL_ESP_INSTRUC_1ER_DIGITO,
-	EST_MEF_PRINCIPAL_ESP_INSTRUC_2DO_DIGITO,
-	EST_MEF_PRINCIPAL_ESP_ACCION_LED,
+	EST_MEF_PRINCIPAL_ESP_1ER_CARACTER,
+	EST_MEF_PRINCIPAL_ESP_2DO_CARACTER,
+	EST_MEF_PRINCIPAL_ESP_3ER_CARACTER,
+	EST_MEF_PRINCIPAL_ESP_4TO_CARACTER,
 	EST_MEF_PRINCIPAL_ESP_FINAL_TRAMA,
 	EST_MEF_PRINCIPAL_EJECUTANDO,
 }estMefPrincipal_enum;
@@ -121,66 +120,50 @@ void mefPrincipal(void){
 			index_bytes = 0;
 			buffer_resp[index_bytes] = buffer[0]; //guardo lo que llegó.
 			index_bytes++;//incrementa en indice que marca en que posicion del buffer_resp se debe ingresar el byte luego de ser verificado
-			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_NUM_GRUPO_1ER_DIGITO;
+			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_1ER_CARACTER;
 		}
 		break;
 
-	case EST_MEF_PRINCIPAL_ESP_NUM_GRUPO_1ER_DIGITO:
-		if(buffer[0]=='0'){
+	case EST_MEF_PRINCIPAL_ESP_1ER_CARACTER:
+		if(buffer[0]=='A'){
 			buffer_resp[index_bytes] = buffer[0]; //guardo lo que llegó.
 			index_bytes++;
-			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_NUM_GRUPO_2DO_DIGITO;
+			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_2DO_CARACTER;
 		}else{
 			clear_buffer(buffer_resp);
 			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
 		}
 		break;
 
-	case EST_MEF_PRINCIPAL_ESP_NUM_GRUPO_2DO_DIGITO:
-		if(buffer[0]==NUM_GRUPO){
+	case EST_MEF_PRINCIPAL_ESP_2DO_CARACTER:
+		if(buffer[0]=='c'){
 			buffer_resp[index_bytes] = buffer[0]; //guardo lo que llegó.
 			index_bytes++;
-			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_INSTRUC_1ER_DIGITO;
+			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_3ER_CARACTER;
 		}else{
 			clear_buffer(buffer_resp);
 			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
 		}
 		break;
 
-	case EST_MEF_PRINCIPAL_ESP_INSTRUC_1ER_DIGITO:
+	case EST_MEF_PRINCIPAL_ESP_3ER_CARACTER:
 
-		if((buffer[0]=='0')||(buffer[0]=='1')||(buffer[0]=='2')){
+		if(buffer[0]=='c'){
 			buffer_resp[index_bytes] = buffer[0]; //guardo lo que llegó.
 			index_bytes++;
-			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_INSTRUC_2DO_DIGITO;
+			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_4TO_CARACTER;
 		}else{
 			clear_buffer(buffer_resp);
 			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
 		}
 		break;
 
-	case EST_MEF_PRINCIPAL_ESP_INSTRUC_2DO_DIGITO:
+	case EST_MEF_PRINCIPAL_ESP_4TO_CARACTER:
 
-		if((buffer[0]=='0')||(buffer[0]=='1')||(buffer[0]=='2')||(buffer[0]=='3')){
+		if((buffer[0]=='X')||(buffer[0]=='Y')||(buffer[0]=='Z')||(buffer[0]=='2')){
 			buffer_resp[index_bytes] = buffer[0]; //guardo lo que llegó.
-			if(buffer_resp[index_bytes-1]!='0'){
-				estMefPrincipal = EST_MEF_PRINCIPAL_ESP_FINAL_TRAMA; //el byte de esta posicion no 0, ya se debe esperar el fin de la trama
-			}else{													 //puesto que la trama en este caso es mas corta
-				estMefPrincipal = EST_MEF_PRINCIPAL_ESP_ACCION_LED;
-			}
 			index_bytes++;
-		}else{
-			clear_buffer(buffer_resp);
-			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
-		}
-		break;
-
-	case EST_MEF_PRINCIPAL_ESP_ACCION_LED:
-
-		if((buffer[0]=='A')||(buffer[0]=='E')||(buffer[0]=='T')){
-			buffer_resp[index_bytes] = buffer[0]; //guardo lo que llegó.
 			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_FINAL_TRAMA;
-			index_bytes++;
 		}else{
 			clear_buffer(buffer_resp);
 			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
@@ -211,78 +194,47 @@ void mefPrincipal(void){
 		 * donde las tramas son mas extensas. No obstante se eligió trabajar de esta manera dado que las tramas (segun el enunciado)
 		 * don de tamaño muy reducido. Sin dudas que si fuesen tramas mucho mas extensas se hubiese optado por otra resolucion (pero no es el caso).
 		 */
-		if(strcmp(buffer_resp, ":0501E\n")==0){ //si se recibió esa instruccion entonces se debe encender el led ROJO
-			board_setLed(BOARD_LED_ID_ROJO, BOARD_LED_MSG_ON);
-			uart0_ringBuffer_envDatos(buffer_resp, sizeof(buffer_resp));
-			index_bytes = 0;
-			clear_buffer(buffer_resp);
-			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
-			break;
-		}
-		if(strcmp(buffer_resp, ":0501A\n")==0){//si se recibió esa instruccion entonces se debe apagar el led ROJO
-			board_setLed(BOARD_LED_ID_ROJO, BOARD_LED_MSG_OFF);
-			uart0_ringBuffer_envDatos(buffer_resp, sizeof(buffer_resp));
-			index_bytes = 0;
-			clear_buffer(buffer_resp);
-			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
-			break;
-		}
-		if(strcmp(buffer_resp, ":0501T\n")==0){
-			board_setLed(BOARD_LED_ID_ROJO, BOARD_LED_MSG_TOGGLE);//si se recibió esa instruccion entonces se debe hacer toggle al led ROJO
-			uart0_ringBuffer_envDatos(buffer_resp, sizeof(buffer_resp));
-			index_bytes = 0;
-			clear_buffer(buffer_resp);
-			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
-			break;
-		}
-		if(strcmp(buffer_resp, ":0502E\n")==0){
-			board_setLed(BOARD_LED_ID_VERDE, BOARD_LED_MSG_ON);//si se recibió esa instruccion entonces se debe encender el led VERDE
-			uart0_ringBuffer_envDatos(buffer_resp, sizeof(buffer_resp));
-			index_bytes = 0;
-			clear_buffer(buffer_resp);
-			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
-			break;
-		}
-		if(strcmp(buffer_resp, ":0502A\n")==0){ //si se recibió esa instruccion entonces se debe apagar el led VERDE
-			board_setLed(BOARD_LED_ID_VERDE, BOARD_LED_MSG_OFF);
-			uart0_ringBuffer_envDatos(buffer_resp, sizeof(buffer_resp));
-			index_bytes = 0;
-			clear_buffer(buffer_resp);
-			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
-			break;
-		}
-		if(strcmp(buffer_resp, ":0502T\n")==0){//si se recibió esa instruccion entonces se debe hacer toggle al led VERDE
-			board_setLed(BOARD_LED_ID_VERDE, BOARD_LED_MSG_TOGGLE);
-			uart0_ringBuffer_envDatos(buffer_resp, sizeof(buffer_resp));
-			index_bytes = 0;
-			clear_buffer(buffer_resp);
+
+		if(strcmp(buffer_resp, ":AccX\n")==0){//si se recibió esa instruccion entonces se debe enviar al maestro el valor de aceleracion (con el formato indicado en el enunciado)
+			NVIC_EnableIRQ(PORTC_PORTD_IRQn); //activa las interrupciones del acelerometro (puerto C y D)
+			Acc_X = abs(mma8451_getAcX()); //almacena los datos de la aceleracion en el eje X
+			NVIC_DisableIRQ(PORTC_PORTD_IRQn); //desactiva las interrupciones del acelerometro
+			insertar(buffer_resp, Acc_X/100 + 48 , 5); //se pone +48 para pasar de numero entero a caracter segun tabla ASCII
+			insertar(buffer_resp, (float)(Acc_X%100) / 10 + 48 , 6);
+			insertar(buffer_resp, Acc_X%10 + 48 , 7);
+			uart0_ringBuffer_envDatos(buffer_resp, sizeof(buffer_resp)); //carga el buffer de respuesta en el ringbuffer y se envia por la UART0
+			clear_buffer(buffer_resp);//limpia el buffer donde se almacena la instruccion o trama
 			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
 			break;
 		}
 
-		if(strcmp(buffer_resp, ":0511\n")==0){//si se recibió esa instruccion entonces se debe leer el estado de SW1
-			if(board_getSw(BOARD_SW_ID_1)){
-				insertar(buffer_resp, 'P', 5);//si esta pulsado se arma la trama de manera que los primeros bytes sean identicos a los recibidos y el ultimo sea una P
-			}else{
-				insertar(buffer_resp, 'N', 5);//si no esta pulsado se arma la trama de manera que los primeros bytes sean identicos a los recibidos y el ultimo sea una N
-			}
-			uart0_ringBuffer_envDatos(buffer_resp, sizeof(buffer_resp));//se envia la trama por la UART0 mediante el ringbuffer
-			clear_buffer(buffer_resp);
+		if(strcmp(buffer_resp, ":AccY\n")==0){//si se recibió esa instruccion entonces se debe enviar al maestro el valor de aceleracion (con el formato indicado en el enunciado)
+			NVIC_EnableIRQ(PORTC_PORTD_IRQn); //activa las interrupciones del acelerometro (puerto C y D)
+			Acc_Y = abs(mma8451_getAcY()); //almacena los datos de la aceleracion en el eje X
+			NVIC_DisableIRQ(PORTC_PORTD_IRQn); //desactiva las interrupciones del acelerometro
+			insertar(buffer_resp, Acc_Y/100 + 48 , 5); //se pone +48 para pasar de numero entero a caracter segun tabla ASCII
+			insertar(buffer_resp, (float)(Acc_Y%100) / 10 + 48 , 6);
+			insertar(buffer_resp, Acc_Y%10 + 48 , 7);
+			uart0_ringBuffer_envDatos(buffer_resp, sizeof(buffer_resp)); //carga el buffer de respuesta en el ringbuffer y se envia por la UART0
+			clear_buffer(buffer_resp);//limpia el buffer donde se almacena la instruccion o trama
 			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
 			break;
 		}
-		if(strcmp(buffer_resp, ":0513\n")==0){//si se recibió esa instruccion entonces se debe leer el estado de SW3
-			if(board_getSw(BOARD_SW_ID_3)){
-				insertar(buffer_resp, 'P', 5);
-			}else{
-				insertar(buffer_resp, 'N', 5);
-			}
-			uart0_ringBuffer_envDatos(buffer_resp, sizeof(buffer_resp));
-			clear_buffer(buffer_resp);
+
+		if(strcmp(buffer_resp, ":AccZ\n")==0){//si se recibió esa instruccion entonces se debe enviar al maestro el valor de aceleracion (con el formato indicado en el enunciado)
+			NVIC_EnableIRQ(PORTC_PORTD_IRQn); //activa las interrupciones del acelerometro (puerto C y D)
+			Acc_Z = abs(mma8451_getAcZ()); //almacena los datos de la aceleracion en el eje X
+			NVIC_DisableIRQ(PORTC_PORTD_IRQn); //desactiva las interrupciones del acelerometro
+			insertar(buffer_resp, Acc_Z/100 + 48 , 5); //se pone +48 para pasar de numero entero a caracter segun tabla ASCII
+			insertar(buffer_resp, (float)(Acc_Z%100) / 10 + 48 , 6);
+			insertar(buffer_resp, Acc_Z%10 + 48 , 7);
+			uart0_ringBuffer_envDatos(buffer_resp, sizeof(buffer_resp)); //carga el buffer de respuesta en el ringbuffer y se envia por la UART0
+			clear_buffer(buffer_resp);//limpia el buffer donde se almacena la instruccion o trama
 			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
 			break;
 		}
-		if(strcmp(buffer_resp, ":0520\n")==0){//si se recibió esa instruccion entonces se debe enviar al maestro el valor de aceleracion (con el formato indicado en el enunciado)
+
+		if(strcmp(buffer_resp, ":Acc2\n")==0){//si se recibió esa instruccion entonces se debe enviar al maestro el valor de aceleracion (con el formato indicado en el enunciado)
 			NVIC_EnableIRQ(PORTC_PORTD_IRQn); //activa las interrupciones del acelerometro (puerto C y D)
 			Acc_X = mma8451_getAcX(); //almacena los datos de la aceleracion en el eje X
 			Acc_Y = mma8451_getAcY(); //almacena los datos de la aceleracion en el eje Y
@@ -298,7 +250,11 @@ void mefPrincipal(void){
 			uart0_ringBuffer_envDatos(buffer_resp, sizeof(buffer_resp)); //carga el buffer de respuesta en el ringbuffer y se envia por la UART0
 			clear_buffer(buffer_resp);//limpia el buffer donde se almacena la instruccion o trama
 			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
+			break;
 		}
+
+		clear_buffer(buffer_resp);//limpia el buffer donde se almacena la instruccion o trama
+		estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
 		break;
 	}
 }
