@@ -33,7 +33,7 @@
 #define FIN_DE_TRAMA (0x0A) //caracter de fin de trama
 #define INICIO_DE_TRAMA 58 //caracter de inicio de trama
 #define NUM_GRUPO 53
-#define LENGTH_BUFFER 20
+#define LENGTH_BUFFER 30
 
 #ifdef COVID19
 /* ======== RESOLUCION CON UART 0 ======== */
@@ -108,6 +108,8 @@ typedef enum{
 	EST_MEF_PRINCIPAL_ESP_FINAL_TRAMA,
 	EST_MEF_PRINCIPAL_EJECUTANDO,
 }estMefPrincipal_enum;
+
+uint8_t signo; // N: Negativo, P: Positivo.
 
 void mefPrincipal(void){
 
@@ -197,11 +199,19 @@ void mefPrincipal(void){
 
 		if(strcmp(buffer_resp, ":AccX\n")==0){//si se recibió esa instruccion entonces se debe enviar al maestro el valor de aceleracion (con el formato indicado en el enunciado)
 			NVIC_EnableIRQ(PORTC_PORTD_IRQn); //activa las interrupciones del acelerometro (puerto C y D)
-			Acc_X = abs(mma8451_getAcX()); //almacena los datos de la aceleracion en el eje X
+			Acc_X = mma8451_getAcX(); //almacena los datos de la aceleracion en el eje X
+			if(Acc_X < 0){
+				signo = 'N';
+				Acc_X = -Acc_X;
+			}else{
+				signo = 'P';
+			}
 			NVIC_DisableIRQ(PORTC_PORTD_IRQn); //desactiva las interrupciones del acelerometro
-			insertar(buffer_resp, Acc_X/100 + 48 , 5); //se pone +48 para pasar de numero entero a caracter segun tabla ASCII
-			insertar(buffer_resp, (float)(Acc_X%100) / 10 + 48 , 6);
-			insertar(buffer_resp, Acc_X%10 + 48 , 7);
+			insertar(buffer_resp, ':' , 5);
+			insertar(buffer_resp, signo , 6);
+			insertar(buffer_resp, Acc_X/100 + 48 , 7); //se pone +48 para pasar de numero entero a caracter segun tabla ASCII
+			insertar(buffer_resp, (float)(Acc_X%100) / 10 + 48 , 8);
+			insertar(buffer_resp, Acc_X%10 + 48 , 9);
 			uart0_ringBuffer_envDatos(buffer_resp, sizeof(buffer_resp)); //carga el buffer de respuesta en el ringbuffer y se envia por la UART0
 			clear_buffer(buffer_resp);//limpia el buffer donde se almacena la instruccion o trama
 			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
@@ -210,11 +220,19 @@ void mefPrincipal(void){
 
 		if(strcmp(buffer_resp, ":AccY\n")==0){//si se recibió esa instruccion entonces se debe enviar al maestro el valor de aceleracion (con el formato indicado en el enunciado)
 			NVIC_EnableIRQ(PORTC_PORTD_IRQn); //activa las interrupciones del acelerometro (puerto C y D)
-			Acc_Y = abs(mma8451_getAcY()); //almacena los datos de la aceleracion en el eje X
+			Acc_Y = mma8451_getAcY(); //almacena los datos de la aceleracion en el eje X
+			if(Acc_Y < 0){
+				signo = 'N';
+				Acc_Y = -Acc_Y;
+			}else{
+				signo = 'P';
+			}
 			NVIC_DisableIRQ(PORTC_PORTD_IRQn); //desactiva las interrupciones del acelerometro
-			insertar(buffer_resp, Acc_Y/100 + 48 , 5); //se pone +48 para pasar de numero entero a caracter segun tabla ASCII
-			insertar(buffer_resp, (float)(Acc_Y%100) / 10 + 48 , 6);
-			insertar(buffer_resp, Acc_Y%10 + 48 , 7);
+			insertar(buffer_resp, ':' , 5);
+			insertar(buffer_resp, signo , 6);
+			insertar(buffer_resp, Acc_Y/100 + 48 , 7); //se pone +48 para pasar de numero entero a caracter segun tabla ASCII
+			insertar(buffer_resp, (float)(Acc_Y%100) / 10 + 48 , 8);
+			insertar(buffer_resp, Acc_Y%10 + 48 , 9);
 			uart0_ringBuffer_envDatos(buffer_resp, sizeof(buffer_resp)); //carga el buffer de respuesta en el ringbuffer y se envia por la UART0
 			clear_buffer(buffer_resp);//limpia el buffer donde se almacena la instruccion o trama
 			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
@@ -223,11 +241,19 @@ void mefPrincipal(void){
 
 		if(strcmp(buffer_resp, ":AccZ\n")==0){//si se recibió esa instruccion entonces se debe enviar al maestro el valor de aceleracion (con el formato indicado en el enunciado)
 			NVIC_EnableIRQ(PORTC_PORTD_IRQn); //activa las interrupciones del acelerometro (puerto C y D)
-			Acc_Z = abs(mma8451_getAcZ()); //almacena los datos de la aceleracion en el eje X
+			Acc_Z = mma8451_getAcZ(); //almacena los datos de la aceleracion en el eje X
+			if(Acc_Z < 0){
+				signo = 'N';
+				Acc_Z = -Acc_Z;
+			}else{
+				signo = 'P';
+			}
 			NVIC_DisableIRQ(PORTC_PORTD_IRQn); //desactiva las interrupciones del acelerometro
-			insertar(buffer_resp, Acc_Z/100 + 48 , 5); //se pone +48 para pasar de numero entero a caracter segun tabla ASCII
-			insertar(buffer_resp, (float)(Acc_Z%100) / 10 + 48 , 6);
-			insertar(buffer_resp, Acc_Z%10 + 48 , 7);
+			insertar(buffer_resp, ':' , 5);
+			insertar(buffer_resp, signo , 6);
+			insertar(buffer_resp, Acc_Z/100 + 48 , 7); //se pone +48 para pasar de numero entero a caracter segun tabla ASCII
+			insertar(buffer_resp, (float)(Acc_Z%100) / 10 + 48 , 8);
+			insertar(buffer_resp, Acc_Z%10 + 48 , 9);
 			uart0_ringBuffer_envDatos(buffer_resp, sizeof(buffer_resp)); //carga el buffer de respuesta en el ringbuffer y se envia por la UART0
 			clear_buffer(buffer_resp);//limpia el buffer donde se almacena la instruccion o trama
 			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
@@ -244,9 +270,10 @@ void mefPrincipal(void){
 			//para descomponer el valor numerico resultante (almacenado en Acc) en unidad, decena y centena
 			//y luego cargarlos individualmente en el buffer de respuesta se realizan las operaciones que se muentran
 			//en el segundo de los argumentos de la funcion insertar()
-			insertar(buffer_resp, Acc/100 + 48 , 5); //se pone +48 para pasar de numero entero a caracter segun tabla ASCII
-			insertar(buffer_resp, (float)(Acc%100) / 10 + 48 , 6);
-			insertar(buffer_resp, Acc%10 + 48 , 7);
+			insertar(buffer_resp, ':' , 5);
+			insertar(buffer_resp, Acc/100 + 48 , 6); //se pone +48 para pasar de numero entero a caracter segun tabla ASCII
+			insertar(buffer_resp, (float)(Acc%100) / 10 + 48 , 7);
+			insertar(buffer_resp, Acc%10 + 48 , 8);
 			uart0_ringBuffer_envDatos(buffer_resp, sizeof(buffer_resp)); //carga el buffer de respuesta en el ringbuffer y se envia por la UART0
 			clear_buffer(buffer_resp);//limpia el buffer donde se almacena la instruccion o trama
 			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
