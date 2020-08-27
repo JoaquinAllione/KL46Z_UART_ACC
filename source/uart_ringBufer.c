@@ -68,8 +68,8 @@ void uart0_ringBuffer_init(void)
 {
 	lpsci_config_t config;
 
-    pRingBufferRx = ringBuffer_init(16);
-    pRingBufferTx = ringBuffer_init(16);
+    pRingBufferRx = ringBuffer_init(32);
+    pRingBufferTx = ringBuffer_init(32);
 
 	CLOCK_SetLpsci0Clock(0x1U);
 

@@ -3,4 +3,4 @@ core_cm0plus.h:769:22:__NVIC_DisableIRQ	16	static
 ejemploUartRB.c:48:6:clear_buffer	24	static
 ejemploUartRB.c:57:6:main	8	static
 ejemploUartRB.c:106:6:sendDataAxes	16	static
-ejemploUartRB.c:136:6:mefPrincipal	8	static
+ejemploUartRB.c:137:6:mefPrincipal	8	static

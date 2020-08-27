@@ -95,7 +95,7 @@ typedef enum{
 }estMefPrincipal_enum;
 
 uint8_t signo; // N: Negativo, P: Positivo.
-uint8_t valor_Acc[4];
+uint8_t valor_Acc[5];
 
 typedef enum{
 	X = 0,
@@ -125,9 +125,10 @@ void sendDataAxes(Axes_enum ax){
 	}
 
 	valor_Acc[0] = signo;
-	valor_Acc[1] = Acc/100 + 48;
-	valor_Acc[2] = (float)(Acc%100) / 10 + 48;
-	valor_Acc[3] = Acc%10 + 48;
+	valor_Acc[1] = ':';
+	valor_Acc[2] = Acc/100 + 48;
+	valor_Acc[3] = (float)(Acc%100) / 10 + 48;
+	valor_Acc[4] = Acc%10 + 48;
 
 	uart0_ringBuffer_envDatos(valor_Acc, sizeof(valor_Acc)); //carga el buffer de respuesta en el ringbuffer y se envia por la UART0
 
@@ -254,7 +255,7 @@ void mefPrincipal(void){
 
 		if(strcmp(buffer_trama, ":Axes\n")==0){//si se recibió esa instruccion entonces se debe enviar al maestro el valor de aceleracion (con el formato indicado en el enunciado)
 
-			uart0_ringBuffer_envDatos(":A:", sizeof(":A:"));
+			//uart0_ringBuffer_envDatos(":A:", sizeof(":A:"));
 			sendDataAxes(X);
 			uart0_ringBuffer_envDatos(":", sizeof(":"));
 			sendDataAxes(Y);
