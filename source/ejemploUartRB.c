@@ -94,9 +94,6 @@ typedef enum{
 	EST_MEF_PRINCIPAL_EJECUTANDO,
 }estMefPrincipal_enum;
 
-uint8_t signo; // N: Negativo, P: Positivo.
-uint8_t valor_Acc[5];
-
 typedef enum{
 	X = 0,
 	Y,
@@ -105,32 +102,35 @@ typedef enum{
 
 void sendDataAxes(Axes_enum ax){
 
+	char str[12] = ":AccX:S:000\n";
+
 	NVIC_EnableIRQ(PORTC_PORTD_IRQn); //activa las interrupciones del acelerometro (puerto C y D)
 
 	if(ax == X){
 		Acc = mma8451_getAcX(); //almacena los datos de la aceleracion en el eje X
+		str[4] = 'X';
 	}else if (ax == Y){
 		Acc = mma8451_getAcY(); //almacena los datos de la aceleracion en el eje Y
+		str[4] = 'Y';
 	}else if (ax == Z){
 		Acc = mma8451_getAcZ(); //almacena los datos de la aceleracion en el eje Z
+		str[4] = 'Z';
 	}
 
 	NVIC_DisableIRQ(PORTC_PORTD_IRQn); //desactiva las interrupciones del acelerometro
 
 	if(Acc < 0){
-		signo = 'N';
+		str[6] = 'N';
 		Acc = -Acc;
 	}else{
-		signo = 'P';
+		str[6] = 'P';
 	}
 
-	valor_Acc[0] = signo;
-	valor_Acc[1] = ':';
-	valor_Acc[2] = Acc/100 + 48;
-	valor_Acc[3] = (float)(Acc%100) / 10 + 48;
-	valor_Acc[4] = Acc%10 + 48;
+	str[8] = Acc/100 + 48;
+	str[9] = (float)(Acc%100) / 10 + 48;
+	str[10] = Acc%10 + 48;
 
-	uart0_ringBuffer_envDatos(valor_Acc, sizeof(valor_Acc)); //carga el buffer de respuesta en el ringbuffer y se envia por la UART0
+	uart0_ringBuffer_envDatos(str, sizeof(str)); //carga el buffer de respuesta en el ringbuffer y se envia por la UART0
 
 }
 
@@ -222,9 +222,7 @@ void mefPrincipal(void){
 
 		if(strcmp(buffer_trama, ":AccX\n")==0){//si se recibió esa instruccion entonces se debe enviar al maestro el valor de aceleracion (con el formato indicado en el enunciado)
 
-			uart0_ringBuffer_envDatos(":AccX:", sizeof(":AccX:"));
 			sendDataAxes(X);
-			uart0_ringBuffer_envDatos("\n", sizeof("\n"));
 
 			clear_buffer(buffer_trama);//limpia el buffer donde se almacena la instruccion o trama
 			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
@@ -233,9 +231,7 @@ void mefPrincipal(void){
 
 		if(strcmp(buffer_trama, ":AccY\n")==0){//si se recibió esa instruccion entonces se debe enviar al maestro el valor de aceleracion (con el formato indicado en el enunciado)
 
-			uart0_ringBuffer_envDatos(":AccY:", sizeof(":AccY:"));
 			sendDataAxes(Y);
-			uart0_ringBuffer_envDatos("\n", sizeof("\n"));
 
 			clear_buffer(buffer_trama);//limpia el buffer donde se almacena la instruccion o trama
 			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
@@ -244,9 +240,7 @@ void mefPrincipal(void){
 
 		if(strcmp(buffer_trama, ":AccZ\n")==0){//si se recibió esa instruccion entonces se debe enviar al maestro el valor de aceleracion (con el formato indicado en el enunciado)
 
-			uart0_ringBuffer_envDatos(":AccZ:", sizeof(":AccZ:"));
 			sendDataAxes(Z);
-			uart0_ringBuffer_envDatos("\n", sizeof("\n"));
 
 			clear_buffer(buffer_trama);//limpia el buffer donde se almacena la instruccion o trama
 			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
@@ -255,14 +249,6 @@ void mefPrincipal(void){
 
 		if(strcmp(buffer_trama, ":Axes\n")==0){//si se recibió esa instruccion entonces se debe enviar al maestro el valor de aceleracion (con el formato indicado en el enunciado)
 
-			//uart0_ringBuffer_envDatos(":A:", sizeof(":A:"));
-			sendDataAxes(X);
-			uart0_ringBuffer_envDatos(":", sizeof(":"));
-			sendDataAxes(Y);
-			uart0_ringBuffer_envDatos(":", sizeof(":"));
-			sendDataAxes(Z);
-
-			uart0_ringBuffer_envDatos("\n", sizeof("\n"));
 
 			clear_buffer(buffer_trama);//limpia el buffer donde se almacena la instruccion o trama
 			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
