@@ -100,6 +100,41 @@ typedef enum{
 	Z,
 }Axes_enum;
 
+void sendDataAllAxes(void){
+
+	char str[20] = ":S:000:S:000:S:000:\n";
+	int8_t i = 0;
+
+	NVIC_EnableIRQ(PORTC_PORTD_IRQn); //activa las interrupciones del acelerometro (puerto C y D)
+
+	for(i = 0; i <= 2; i++){
+
+		if(i == 0){
+			Acc = mma8451_getAcX(); //almacena los datos de la aceleracion en el eje X
+		}else if(i == 1){
+			Acc = mma8451_getAcY(); //almacena los datos de la aceleracion en el eje Y
+		}else if(i == 2){
+			Acc = mma8451_getAcZ(); //almacena los datos de la aceleracion en el eje Z
+		}
+
+		if(Acc < 0){
+			str[1+i*6] = 'N';
+			Acc = -Acc;
+		}else{
+			str[1+i*6] = 'P';
+		}
+
+		str[3+i*6] = Acc/100 + 48;
+		str[4+i*6] = (float)(Acc%100) / 10 + 48;
+		str[5+i*6] = Acc%10 + 48;
+	}
+
+	NVIC_DisableIRQ(PORTC_PORTD_IRQn); //desactiva las interrupciones del acelerometro
+
+
+	uart0_ringBuffer_envDatos(str, sizeof(str));
+}
+
 void sendDataAxes(Axes_enum ax){
 
 	char str[12] = ":AccX:S:000\n";
@@ -249,6 +284,7 @@ void mefPrincipal(void){
 
 		if(strcmp(buffer_trama, ":Axes\n")==0){//si se recibió esa instruccion entonces se debe enviar al maestro el valor de aceleracion (con el formato indicado en el enunciado)
 
+			sendDataAllAxes();
 
 			clear_buffer(buffer_trama);//limpia el buffer donde se almacena la instruccion o trama
 			estMefPrincipal = EST_MEF_PRINCIPAL_ESP_COMIENZO_TRAMA;
